@@ -1,5 +1,5 @@
 cask "stash-app@dev" do
-  version "0.31.1-51-g70437b48"
+  version "0.31.1-53-g4a4cd1c5"
   sha256 :no_check
 
   url "https://github.com/stashapp/stash/releases/download/latest_develop/Stash.app.zip",
