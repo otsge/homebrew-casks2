@@ -4,6 +4,10 @@
 
 sudo bash <<EOF
 
+if [ ! -e "/usr/local/lib/libfuse.dylib" ]; then
+  ln -sf $(realpath /usr/local/lib/libfuse-t.dylib | sed 's#/usr/local/lib/##g') /usr/local/lib/libfuse.dylib
+fi
+
 if [ ! -e "/usr/local/lib/pkgconfig/fuse.pc" ]; then
   ln -sf /usr/local/lib/pkgconfig/fuse-t.pc /usr/local/lib/pkgconfig/fuse.pc
 fi
