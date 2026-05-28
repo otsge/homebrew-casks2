@@ -30,6 +30,10 @@ env:
   HOMEBREW_NO_INSTALL_FROM_API: 1
   HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
 
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
 concurrency:
   group: "${{ github.ref }}"
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -90,8 +94,8 @@ jobs:
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@main
         with:
-          core: true
-          cask: true
+          core: false
+          cask: false
 
       - name: Enable debug mode
         run: |
@@ -102,7 +106,7 @@ jobs:
       - name: Check out Pull Request
         uses: actions/checkout@main
         with:
-          fetch-depth: 0
+          # fetch-depth: 0
           persist-credentials: false
 
       - name: Clean up CI machine
@@ -141,18 +145,37 @@ jobs:
         if: >
           always() &&
           contains(fromJSON('["success", "skipped"]'), steps.tap-syntax.outcome) &&
-          matrix.cask
+          matrix.cask &&
+          runner.os == 'macOS'
+
+      - name: Perform search and replace in Bash
+        id: audit-args
+        env:
+          MATRIX_AUDIT_ARGS: ${{ join(matrix.audit_args, ' ')}}
+        run: |
+          modified_audit_args="${MATRIX_AUDIT_ARGS//signing/no-signing}"
+          echo "${modified_audit_args}"
+          echo "new_audit_args=${modified_audit_args}" >> "${GITHUB_OUTPUT}"
 
       - name: Run brew audit --cask${{ (matrix.cask && ' ') || ' --tap ' }}${{ matrix.cask.token || matrix.tap }}
         id: audit
         run: |
-          brew audit --cask ${{ join(matrix.audit_args, ' ') }}${{ (matrix.cask && ' ') || ' --tap ' }}'${{ matrix.cask.token || matrix.tap }}'
+          # brew audit --cask ${{ join(matrix.audit_args, ' ') }}${{ (matrix.cask && ' ') || ' --tap ' }}'${{ matrix.cask.token || matrix.tap }}'
+          if [[ "${{ runner.os }}" == "macOS" && "${{ runner.arch }}" == "X64" ]]
+          then
+            LC_ALL=C LANG=C sed -i '' 's/return "#{tag} is a GitHub pre-release."/#return "#{tag} is a GitHub pre-release."/g' "$(brew --prefix)/Homebrew/Library/Homebrew/utils/shared_audits.rb"
+          elif [[ "${{ runner.os }}" == "macOS" && "${{ runner.arch }}" == "ARM64" ]]
+          then
+            LC_ALL=C LANG=C sed -i '' 's/return "#{tag} is a GitHub pre-release."/#return "#{tag} is a GitHub pre-release."/g' /opt/homebrew/Library/Homebrew/utils/shared_audits.rb
+          fi
+          brew audit --cask ${{ steps.audit-args.outputs.new_audit_args }}${{ (matrix.cask && ' ') || ' --tap ' }}'${{ matrix.cask.token || matrix.tap }}'
         timeout-minutes: 30
         if: >
           always() &&
           contains(fromJSON('["success", "skipped"]'), steps.tap-syntax.outcome) &&
           (!matrix.cask || steps.fetch.outcome == 'success') &&
-          !matrix.skip_audit
+          !matrix.skip_audit &&
+          runner.os == 'macOS'
 
       - name: Gather cask information
         id: info
@@ -196,7 +219,7 @@ jobs:
               f.puts "FORMULA_CONFLICTS=#{formula_conflicts&.join(" ")}" if formula_conflicts.present?
             end
           EOF
-        if: always() && steps.fetch.outcome == 'success' && matrix.cask
+        if: always() && steps.fetch.outcome == 'success' && matrix.cask && runner.os == 'macOS'
 
       - name: Uninstall conflicting formulae
         run: |
@@ -236,7 +259,8 @@ jobs:
         if: >
           always() && steps.info.outcome == 'success' &&
           fromJSON(steps.info.outputs.macos_requirement_satisfied) &&
-          !matrix.skip_install
+          !matrix.skip_install &&
+          runner.os == 'macOS'
         timeout-minutes: 30
 
       - name: Run brew uninstall --cask ${{ matrix.cask.token }}

@@ -2,21 +2,36 @@ name: Triage tasks
 
 on: pull_request_target
 
+env:
+  GH_REPO: ${{ github.repository }}
+  GH_NO_UPDATE_NOTIFIER: 1
+  GH_PROMPT_DISABLED: 1
+  HOMEBREW_DEVELOPER: 1
+  HOMEBREW_NO_ANALYTICS: 1
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
 concurrency:
   group: "triage-${{ github.event.number }}"
   cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   triage:
     runs-on: ubuntu-slim
     permissions:
       contents: read
+      issues: write
       pull-requests: write
+      statuses: write
     steps:
       - name: Check commit format
         uses: Homebrew/actions/check-commit-format@main
         with:
           token: ${{secrets.GITHUB_TOKEN}}
+
       - name: Label pull request
         uses: Homebrew/actions/label-pull-requests@main
         if: always()
