@@ -8,7 +8,7 @@ cask "mediadownloader" do
   homepage "https://github.com/mhogomchungu/media-downloader"
 
   conflicts_with cask: "mediadownloader@git"
-  depends_on :macos
+  depends_on macos: :sonoma
 
   app "MediaDownloader.app"
 
