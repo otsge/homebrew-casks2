@@ -23,7 +23,7 @@ cask "deskflow" do
   end
 
   conflicts_with cask: "deskflow@dev"
-  depends_on macos: :monterey
+  depends_on :macos
 
   app "Deskflow.app"
 

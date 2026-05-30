@@ -26,6 +26,7 @@ cask "stash-app@dev" do
 
   app "Stash.app"
 
+  # No zap stanza required
   # zap trash: [
   # ]
 end

@@ -1,7 +1,7 @@
 cask "deskflow@dev" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "1.26.0.210"
+  version "1.26.0.211"
   sha256 :no_check
 
   on_monterey :or_newer do
@@ -30,7 +30,7 @@ cask "deskflow@dev" do
   end
 
   conflicts_with cask: "deskflow"
-  depends_on macos: :monterey
+  depends_on :macos
 
   app "Deskflow.app"
 
