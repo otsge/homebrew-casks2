@@ -163,9 +163,11 @@ jobs:
           # brew audit --cask ${{ join(matrix.audit_args, ' ') }}${{ (matrix.cask && ' ') || ' --tap ' }}'${{ matrix.cask.token || matrix.tap }}'
           if [[ "${{ runner.os }}" == "macOS" && "${{ runner.arch }}" == "X64" ]]
           then
+            LC_ALL=C LANG=C sed -i '' 's/return "#{notability_prefix}/"#{notability_prefix}/g' "$(brew --prefix)/Homebrew/Library/Homebrew/utils/shared_audits.rb"
             LC_ALL=C LANG=C sed -i '' 's/return "#{tag} is a GitHub pre-release."/#return "#{tag} is a GitHub pre-release."/g' "$(brew --prefix)/Homebrew/Library/Homebrew/utils/shared_audits.rb"
           elif [[ "${{ runner.os }}" == "macOS" && "${{ runner.arch }}" == "ARM64" ]]
           then
+            LC_ALL=C LANG=C sed -i '' 's/return "#{notability_prefix}/"#{notability_prefix}/g' /opt/homebrew/Library/Homebrew/utils/shared_audits.rb
             LC_ALL=C LANG=C sed -i '' 's/return "#{tag} is a GitHub pre-release."/#return "#{tag} is a GitHub pre-release."/g' /opt/homebrew/Library/Homebrew/utils/shared_audits.rb
           fi
           brew audit --cask ${{ steps.audit-args.outputs.new_audit_args }}${{ (matrix.cask && ' ') || ' --tap ' }}'${{ matrix.cask.token || matrix.tap }}'
@@ -304,3 +306,11 @@ jobs:
     steps:
       - name: Result
         run: ${{ needs.test.result == 'success' }}
+
+      - name: Label the Pull Request
+        id: label-the-pr
+        env:
+          GH_TOKEN: ${{secrets.AUTOBUMP_TOKEN}}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "${PR_NUMBER}" --add-label "pr-pull" --repo "otsge/homebrew-casks2"
+        if: ${{ needs.test.result == 'success'  && github.event_name == 'pull_request' }}

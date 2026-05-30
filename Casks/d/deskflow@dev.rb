@@ -4,11 +4,11 @@ cask "deskflow@dev" do
   version "1.26.0.210"
   sha256 :no_check
 
-  on_arm do
-    depends_on macos: :sonoma
+  on_monterey :or_newer do
+    depends_on arch: :x86_64
   end
-  on_intel do
-    depends_on macos: :monterey
+  on_sonoma :or_newer do
+    depends_on arch: :arm64
   end
 
   url "https://github.com/deskflow/deskflow/releases/download/continuous/deskflow-continuous-macos-#{arch}.dmg"
@@ -30,6 +30,7 @@ cask "deskflow@dev" do
   end
 
   conflicts_with cask: "deskflow"
+  depends_on macos: :monterey
 
   app "Deskflow.app"
 

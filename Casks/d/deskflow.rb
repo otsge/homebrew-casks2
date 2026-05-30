@@ -5,11 +5,11 @@ cask "deskflow" do
   sha256 arm:   "bae6befc2c3119de3d751c1200aab30af3efa5496e91d5ca1029cc388eea69c5",
          intel: "b60bd78e829b9937c5812e6fc208b72a9235c3a5ba836601d50e1a5be9ac4af2"
 
-  on_arm do
-    depends_on macos: :sonoma
+  on_monterey :or_newer do
+    depends_on arch: :x86_64
   end
-  on_intel do
-    depends_on macos: :monterey
+  on_sonoma :or_newer do
+    depends_on arch: :arm64
   end
 
   url "https://github.com/deskflow/deskflow/releases/download/v#{version}/deskflow-#{version}-macos-#{arch}.dmg"
@@ -23,7 +23,7 @@ cask "deskflow" do
   end
 
   conflicts_with cask: "deskflow@dev"
-  depends_on :macos
+  depends_on macos: :monterey
 
   app "Deskflow.app"
 
