@@ -22,7 +22,7 @@ cask "stash-app@dev" do
   end
 
   conflicts_with cask: "stash-app"
-  depends_on :macos
+  depends_on macos: :monterey
 
   app "Stash.app"
 
