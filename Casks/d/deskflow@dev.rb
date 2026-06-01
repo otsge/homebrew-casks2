@@ -1,14 +1,14 @@
 cask "deskflow@dev" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "1.26.0.211"
+  version "1.26.0.214"
   sha256 :no_check
 
-  on_monterey :or_newer do
-    depends_on arch: :x86_64
+  on_arm do
+    depends_on macos: :sonoma
   end
-  on_sonoma :or_newer do
-    depends_on arch: :arm64
+  on_intel do
+    depends_on macos: :monterey
   end
 
   url "https://github.com/deskflow/deskflow/releases/download/continuous/deskflow-continuous-macos-#{arch}.dmg"
