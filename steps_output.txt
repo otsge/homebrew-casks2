@@ -1,0 +1,2 @@
+Error: 1 failed step!
+git -C /opt/homebrew/Library/Taps/otsge/homebrew-tap reset --hard origin/main
